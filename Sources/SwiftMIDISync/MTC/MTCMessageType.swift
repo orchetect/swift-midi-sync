@@ -1,0 +1,30 @@
+//
+//  MTCMessageType.swift
+//  swift-midi • https://github.com/orchetect/swift-midi
+//  © 2026 Steffan Andrews • Licensed under MIT License
+//
+
+import SwiftMIDICore
+
+public enum MTCMessageType {
+    /// MTC Full-Frame Message
+    ///
+    /// Timecode changed as a result of a full-frame message, which a MTC transmitter will send
+    /// while not playing back but locating to a new timecode
+    case fullFrame
+        
+    /// MTC Quarter-Frame Message
+    ///
+    /// Timecode changed as a result of MTC quarter-frame data stream
+    case quarterFrame
+}
+
+extension MTCMessageType: Equatable { }
+
+extension MTCMessageType: Hashable { }
+
+extension MTCMessageType: Identifiable {
+    public var id: Self { self }
+}
+
+extension MTCMessageType: Sendable { }

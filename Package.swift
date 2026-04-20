@@ -18,16 +18,17 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/orchetect/swift-midi-events", from: "0.1.0"),
-        .package(url: "https://github.com/orchetect/swift-midi-io", from: "0.1.0"),
+        .package(path: "../swift-midi-core"), // .package(url: "https://github.com/orchetect/swift-midi-core", from: "0.1.0"),
+        .package(path: "../swift-midi-io"), // .package(url: "https://github.com/orchetect/swift-midi-io", from: "0.1.0"),
         .package(url: "https://github.com/orchetect/swift-timecode", from: "3.1.0")
     ],
     targets: [
         .target(
             name: "SwiftMIDISync",
             dependencies: [
-                .product(name: "SwiftMIDIEvents", packge: "swift-midi-events"),
-                .product(name: "SwiftMIDIIO", packge: "swift-midi-io"),
+                .product(name: "SwiftMIDICore", package: "swift-midi-core"),
+                .product(name: "SwiftMIDIInternals", package: "swift-midi-core"),
+                .product(name: "SwiftMIDIIO", package: "swift-midi-io"),
                 .product(name: "SwiftTimecodeCore", package: "swift-timecode")
             ],
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]
@@ -35,7 +36,7 @@ let package = Package(
         .testTarget(
             name: "SwiftMIDISyncTests",
             dependencies: [
-                .target(name: "SwiftMIDISync")
+                "SwiftMIDISync"
             ]
         )
     ]
