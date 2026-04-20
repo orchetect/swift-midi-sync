@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "2BD564A3-412D-46F8-8B00-5BD71F602614",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SwiftMIDISyncTests",
+        "name" : "SwiftMIDISyncTests"
+      }
+    }
+  ],
+  "version" : 1
+}
