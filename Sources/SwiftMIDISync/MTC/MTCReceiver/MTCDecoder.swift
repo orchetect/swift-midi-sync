@@ -32,7 +32,6 @@
 import Foundation
 import SwiftMIDICore
 import SwiftMIDIInternals
-import SwiftMIDIIO
 import SwiftTimecodeCore
 
 /// MTC (MIDI Timecode) stream decoder object.

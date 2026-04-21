@@ -7,7 +7,6 @@
 import Darwin
 import Foundation
 import SwiftMIDICore
-import SwiftMIDIIO
 import SwiftMIDIInternals
 import SwiftTimecodeCore
 

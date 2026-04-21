@@ -19,7 +19,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/orchetect/swift-midi-core", branch: "main"), // TODO: from: "0.1.0"),
-        .package(url: "https://github.com/orchetect/swift-midi-io", branch: "main"), // TODO: from: "0.1.0"),
         .package(url: "https://github.com/orchetect/swift-timecode", from: "3.1.0"),
         .package(url: "https://github.com/orchetect/swift-testing-extensions", from: "0.3.0")
     ],
@@ -29,7 +28,6 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftMIDICore", package: "swift-midi-core"),
                 .product(name: "SwiftMIDIInternals", package: "swift-midi-core"),
-                .product(name: "SwiftMIDIIO", package: "swift-midi-io"),
                 .product(name: "SwiftTimecodeCore", package: "swift-timecode")
             ],
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]
