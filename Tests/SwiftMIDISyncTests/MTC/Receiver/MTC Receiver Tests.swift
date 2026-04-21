@@ -6,8 +6,9 @@
 
 import Foundation
 @testable import SwiftMIDISync
-import Testing
 import SwiftTimecodeCore
+import Testing
+import TestingExtensions
 
 @Suite struct MTC_Receiver_Receiver_Tests {
     @Test

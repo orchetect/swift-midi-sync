@@ -5,8 +5,9 @@
 //
 
 @testable import SwiftMIDISync
-import Testing
 @testable import SwiftTimecodeCore
+import Testing
+import TestingExtensions
 
 @Suite struct MTC_Generator_Encoder_Tests {
     @Test
