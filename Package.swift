@@ -30,6 +30,7 @@ let package = Package(
                 .product(name: "SwiftMIDIInternals", package: "swift-midi-core"),
                 .product(name: "SwiftTimecodeCore", package: "swift-timecode")
             ],
+            exclude: ["MTC/README.md"],
             swiftSettings: [.define("DEBUG", .when(configuration: .debug))]
         ),
         .testTarget(
