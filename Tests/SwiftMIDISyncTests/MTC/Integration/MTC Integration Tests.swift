@@ -838,7 +838,9 @@ struct MTC_Integration_Integration_Tests {
             // iterate: each span in the collection of test ranges
             for range in ranges {
                 let startOffset = 2 * Int(frameRate.mtcScaleFactor)
-                try mtcEnc.locate(to: #require(range.first?.subtracting(.components(f: startOffset), by: .wrapping)))
+                let firstRange = try #require(range.first)
+                let loc = try firstRange.subtracting(.components(f: startOffset), by: .wrapping)
+                mtcEnc.locate(to: loc)
 
                 mtcEnc.increment() // QF 0
                 #expect(mtcEnc.mtcQuarterFrame == 0)
