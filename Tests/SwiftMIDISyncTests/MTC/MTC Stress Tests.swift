@@ -1,6 +1,6 @@
 //
-//  Stress Tests.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  MTC Stress Tests.swift
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -8,18 +8,19 @@ import CoreMIDI
 @testable import SwiftMIDISync
 import Testing
 
-@Suite struct StressTests {
+@Suite
+struct StressTests {
     @Test @TestActor
     func threadingMTCGenerator() async {
         // MARK: - Generator
-        
+
         let mtcGen = MTCGenerator { midiMessage in
             _ = midiMessage
         }
-        
+
         // test public properties and methods
         // to make sure we don't encounter thread-related crashes
-        
+
         func access() {
             // public properties (set and get where applicable)
             _ = mtcGen.name
@@ -31,7 +32,7 @@ import Testing
             mtcGen.locateBehavior = .always
             _ = mtcGen.midiOutHandler
             mtcGen.setMIDIOutHandler { _ in }
-            
+
             // public methods
             mtcGen.locate(to: Timecode(.zero, at: .fps24))
             mtcGen.locate(to: Timecode.Components.zero)
@@ -42,23 +43,23 @@ import Testing
             mtcGen.start(now: 0.0, frameRate: .fps24)
             mtcGen.stop()
         }
-        
+
         // from same thread as its allocation
         access()
-        
+
         // from different thread
         _ = await Task { @TestActor in
             access()
         }.value
     }
-    
+
     @Test
     func threadingMTCReceiver() async {
         // MARK: - Receiver
-        
+
         // (Receiver.midiIn() is async internally so we need to wait for
         // property updates to occur before reading them)
-        
+
         // init with local frame rate
         let mtcRec = MTCReceiver(
             name: "test",
@@ -71,10 +72,10 @@ import Testing
         } stateChanged: { state in
             _ = state
         }
-        
+
         // test public properties and methods
         // to make sure we don't encounter thread-related crashes
-        
+
         func access() {
             // public properties (set and get where applicable)
             _ = mtcRec.state
@@ -86,14 +87,14 @@ import Testing
             _ = mtcRec.syncPolicy
             _ = mtcRec.timecodeChangedHandler
             mtcRec.setTimecodeChangedHandler { _, _, _, _ in }
-            
+
             // public methods
             // (none)
         }
-        
+
         // from same thread as its allocation
         access()
-        
+
         // from different thread
         _ = await Task {
             access()

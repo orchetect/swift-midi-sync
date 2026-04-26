@@ -1,6 +1,6 @@
 //
 //  MTCFrameRate Translation.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -13,12 +13,12 @@ extension MTCFrameRate {
     /// Returns all timecode frame rates derived from the MTC base frame rate.
     public var derivedFrameRates: [TimecodeFrameRate] {
         // could hard-code these, but keeping it functional ensures compiler safety checking
-        
+
         TimecodeFrameRate
             .allCases
             .filter { $0.transmitsMTC(using: self) }
     }
-    
+
     /// Returns the timecode frame rate that exactly matches the MTC base frame rate.
     ///
     /// Useful for internal calculations.
@@ -26,12 +26,14 @@ extension MTCFrameRate {
     /// To get all timecode frame rates that are compatible, use ``derivedFrameRates`` instead.
     @inline(__always)
     public var directEquivalentFrameRate: TimecodeFrameRate {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .mtc24:    .fps24
         case .mtc25:    .fps25
         case .mtc2997d: .fps29_97d
         case .mtc30:    .fps30
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }
 
@@ -40,6 +42,7 @@ extension TimecodeFrameRate {
     /// necessary)
     @inline(__always)
     public var mtcFrameRate: MTCFrameRate {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .fps23_976:  .mtc24
         case .fps24:      .mtc24
@@ -65,8 +68,9 @@ extension TimecodeFrameRate {
         case .fps120:     .mtc30
         case .fps120d:    .mtc2997d
         }
+        // swiftformat:enable consecutiveSpaces
     }
-    
+
     /// Returns true if the timecode frame rate is derived from the MTC frame rate.
     @inlinable
     public func transmitsMTC(using mtcFrameRate: MTCFrameRate) -> Bool {
@@ -103,11 +107,11 @@ extension MTCFrameRate {
         guard derivedFrameRates.contains(timecodeRate) else {
             return nil
         }
-        
+
         // clean inputs
         let rawMTCFrames = max(0, fromRawMTCFrames)
         let rawMTCQuarterFrames = min(max(0, quarterFrames), 7)
-        
+
         // baseline check: if MTC frame rate is exactly equivalent to resultant timecode frame rate,
         // skip the scale math
         if directEquivalentFrameRate == timecodeRate {
@@ -115,14 +119,14 @@ extension MTCFrameRate {
                 ? Double(rawMTCFrames)
                 : Double(rawMTCFrames) + (Double(rawMTCQuarterFrames) * 0.25)
         }
-        
+
         // prep
         let _rawMTCFrames = Double(rawMTCFrames)
         let _frameFraction = Double(rawMTCQuarterFrames) * 0.25
-        
+
         // calculation
         var scaled = (_rawMTCFrames + _frameFraction) * timecodeRate.mtcScaleFactor
-        
+
         // account for 24.98fps rounding weirdness
         // due to it being transmit as MTC-24fps, the scaled value will always be underestimated so
         // adding a static offset is a clumsy but effective workaround
@@ -131,7 +135,7 @@ extension MTCFrameRate {
                 scaled += 0.24
             }
         }
-        
+
         // return
         return scaled
     }
@@ -159,14 +163,14 @@ extension TimecodeFrameRate {
         let scaleFactor = self == .fps24_98
             ? mtcScaleFactor - 0.001
             : mtcScaleFactor
-        
+
         // prep
         let scaled = fromTimecodeFrames / scaleFactor
         let _tcFrameFraction = scaled.truncatingRemainder(dividingBy: 2)
-        
+
         let _rawMTCFrames = Int(scaled - _tcFrameFraction) // truncates at decimal
         let _rawMTCQuarterFrames = UInt8(_tcFrameFraction / 0.25)
-        
+
         return (
             rawMTCFrames: _rawMTCFrames,
             rawMTCQuarterFrames: _rawMTCQuarterFrames
@@ -180,7 +184,8 @@ extension TimecodeFrameRate {
     var mtcScaleFactor: Double {
         // calculated from:
         // (self.maxFrameNumberDisplayable + 1) / self.mtcFrameRate.fpsValueForScaling
-        
+
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .fps23_976:  1
         case .fps24:      1
@@ -206,5 +211,6 @@ extension TimecodeFrameRate {
         case .fps120:     4
         case .fps120d:    4
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }

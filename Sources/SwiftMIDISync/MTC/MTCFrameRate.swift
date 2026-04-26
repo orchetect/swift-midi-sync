@@ -1,6 +1,6 @@
 //
 //  MTCFrameRate.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -56,7 +56,7 @@ import SwiftTimecodeCore
 // MTC distinguishes between film speed and video speed only by the rate at which
 // timecode advances, not by the information contained in the timecode messages;
 // thus, 29.97 fps dropframe is represented as 30 fps dropframe at 0.1% pulldown.
-    
+
 /// Standard base timecode frame rate families expressed in MTC.
 ///
 /// This does not always directly correlate to the actual frame rate the transmitting and receiving
@@ -67,13 +67,13 @@ import SwiftTimecodeCore
 public enum MTCFrameRate {
     /// MTC frame rate classification of 24 fps and related rates
     case mtc24
-    
+
     /// MTC frame rate classification of 25 fps and related rates
     case mtc25
-    
+
     /// MTC frame rate classification of 29.97 drop fps and related rates
     case mtc2997d
-    
+
     /// MTC frame rate classification of 30 fps and related rates
     case mtc30
 }
@@ -85,7 +85,9 @@ extension MTCFrameRate: Hashable { }
 extension MTCFrameRate: CaseIterable { }
 
 extension MTCFrameRate: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension MTCFrameRate: Sendable { }
@@ -94,12 +96,12 @@ extension MTCFrameRate: Sendable { }
 
 extension MTCFrameRate {
     /// Construct based on the corresponding real timecode frame rate
-    
+
     @inline(__always)
     public init(_ timecodeFrameRate: TimecodeFrameRate) {
         self = timecodeFrameRate.mtcFrameRate
     }
-    
+
     /// Construct from MTC bits
     @inline(__always)
     public init?(_ bitValue: UInt8) {
@@ -108,7 +110,7 @@ extension MTCFrameRate {
         case 0b01: self = .mtc25
         case 0b10: self = .mtc2997d
         case 0b11: self = .mtc30
-        default:   return nil
+        default: return nil
         }
     }
 }
@@ -120,31 +122,31 @@ extension MTCFrameRate {
     @inline(__always)
     public var bitValue: UInt8 {
         switch self {
-        case .mtc24:    0b00
-        case .mtc25:    0b01
+        case .mtc24: 0b00
+        case .mtc25: 0b01
         case .mtc2997d: 0b10
-        case .mtc30:    0b11
+        case .mtc30: 0b11
         }
     }
-    
+
     /// Human-readable descriptive string
     public var stringValue: String {
         switch self {
-        case .mtc24:    "SMPTE-24"
-        case .mtc25:    "SMPTE-25"
+        case .mtc24: "SMPTE-24"
+        case .mtc25: "SMPTE-25"
         case .mtc2997d: "SMPTE-29.97d"
-        case .mtc30:    "SMPTE-30"
+        case .mtc30: "SMPTE-30"
         }
     }
-    
+
     /// Returns true if the rate is drop-frame
     @inline(__always)
     public var isDrop: Bool {
         switch self {
-        case .mtc24:    false
-        case .mtc25:    false
+        case .mtc24: false
+        case .mtc25: false
         case .mtc2997d: true
-        case .mtc30:    false
+        case .mtc30: false
         }
     }
 }
@@ -156,10 +158,10 @@ extension MTCFrameRate {
     @inline(__always)
     var fpsValueForScaling: Int {
         switch self {
-        case .mtc24:    24
-        case .mtc25:    25
+        case .mtc24: 24
+        case .mtc25: 25
         case .mtc2997d: 30
-        case .mtc30:    30
+        case .mtc30: 30
         }
     }
 }

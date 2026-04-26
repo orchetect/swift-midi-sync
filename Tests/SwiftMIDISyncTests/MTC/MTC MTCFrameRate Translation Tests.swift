@@ -1,6 +1,6 @@
 //
 //  MTC MTCFrameRate Translation Tests.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -8,17 +8,18 @@
 import SwiftTimecodeCore
 import Testing
 
-@Suite struct MTC_MTCFrameRate_Translation_Tests {
+@Suite
+struct MTC_MTCFrameRate_Translation_Tests {
     @Test
     func mtcFrameRate_derivedFrameRates() {
         // these tests may be pedantic, but we'll put them in any way
         // since this acts as our source of truth
-        
+
         // ensure all four MTC frame rate families return the correct
         // matching derived timecode frame rates
-        
+
         // MTC: 24
-        
+
         #expect(
             MTCFrameRate.mtc24.derivedFrameRates ==
                 [
@@ -31,9 +32,9 @@ import Testing
                     .fps96
                 ]
         )
-        
+
         // MTC: 25
-        
+
         #expect(
             MTCFrameRate.mtc25.derivedFrameRates ==
                 [
@@ -42,9 +43,9 @@ import Testing
                     .fps100
                 ]
         )
-        
+
         // MTC: drop
-        
+
         #expect(
             MTCFrameRate.mtc2997d.derivedFrameRates ==
                 [
@@ -56,9 +57,9 @@ import Testing
                     .fps120d
                 ]
         )
-        
+
         // MTC: drop
-        
+
         #expect(
             MTCFrameRate.mtc30.derivedFrameRates ==
                 [

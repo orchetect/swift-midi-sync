@@ -1,6 +1,6 @@
 //
 //  MTCGenerator State.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -13,7 +13,7 @@ extension MTCGenerator {
         /// Idle:
         /// No activity (outgoing continuous data stream stopped).
         case idle
-        
+
         /// Generating:
         /// Generator is actively generating messages.
         case generating
@@ -25,7 +25,9 @@ extension MTCGenerator.State: Equatable { }
 extension MTCGenerator.State: Hashable { }
 
 extension MTCGenerator.State: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension MTCGenerator.State: Sendable { }

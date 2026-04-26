@@ -1,6 +1,6 @@
 //
 //  MTCEncoder FullFrameBehavior.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -11,7 +11,7 @@ extension MTCEncoder {
     public enum FullFrameBehavior {
         /// Always trigger a MTC Full-Frame MIDI message, with no data thinning.
         case always
-        
+
         /// Trigger a MTC Full-Frame MIDI message only if different from the last Full-Frame message
         /// formed by the ``MTCEncoder``. (default)
         ///
@@ -19,7 +19,7 @@ extension MTCEncoder {
         /// of MTC messages to get duplicate Full-Frame messages and it is ideal to optimize the
         /// amount of unnecessary data transmitted.
         case ifDifferent
-        
+
         /// Do not trigger a MTC Full-Frame MIDI message.
         ///
         /// This is not a typical condition and may likely only be used for debugging. It is
@@ -35,7 +35,9 @@ extension MTCEncoder.FullFrameBehavior: Hashable { }
 extension MTCEncoder.FullFrameBehavior: CaseIterable { }
 
 extension MTCEncoder.FullFrameBehavior: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension MTCEncoder.FullFrameBehavior: Sendable { }

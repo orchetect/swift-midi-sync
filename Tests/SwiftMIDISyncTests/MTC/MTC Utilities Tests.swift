@@ -1,6 +1,6 @@
 //
 //  MTC Utilities Tests.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -8,13 +8,14 @@
 import SwiftTimecodeCore
 import Testing
 
-@Suite struct MTC_Utilities_Tests {
+@Suite
+struct MTC_Utilities_Tests {
     @Test
     func global_isMTCEqual() {
         #expect(
             !isMTCEqual(nil, nil)
         )
-        
+
         // test all MTC rates
         for fRate in MTCFrameRate.allCases {
             #expect(
@@ -23,14 +24,14 @@ import Testing
                     nil
                 )
             )
-            
+
             #expect(
                 !isMTCEqual(
                     nil,
                     (mtcComponents: .init(), mtcFrameRate: fRate)
                 )
             )
-            
+
             // == components, == frame rate
             #expect(
                 isMTCEqual(
@@ -38,7 +39,7 @@ import Testing
                     (mtcComponents: .init(), mtcFrameRate: fRate)
                 )
             )
-            
+
             // == components, == frame rate
             #expect(
                 isMTCEqual(
@@ -46,7 +47,7 @@ import Testing
                     (mtcComponents: .init(h: 1, m: 02, s: 03, f: 04), mtcFrameRate: fRate)
                 )
             )
-            
+
             // != components, == frame rate
             #expect(
                 !isMTCEqual(
@@ -55,7 +56,7 @@ import Testing
                 )
             )
         }
-        
+
         // == components, != frame rate
         #expect(
             !isMTCEqual(

@@ -1,6 +1,6 @@
 //
 //  MTCEncoder.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -18,7 +18,7 @@ import SwiftTimecodeCore
 /// > additional abstraction for generating MTC sync.
 public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchecked required for @PThreadMutex use
     // MARK: - Public properties
-        
+
     /// Returns current `Timecode` at ``localFrameRate``, scaling if necessary.
     public var timecode: Timecode {
         guard let scaledFrames = mtcFrameRate.scaledFrames(
@@ -30,12 +30,12 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
             // in future we may want this to be an error condition
             return Timecode(.zero, at: localFrameRate)
         }
-            
+
         var scaledComponents = mtcComponents
         scaledComponents.frames = Int(scaledFrames)
         // sanitize: clear subframes since we're working at 1-frame resolution with timecode display values
         scaledComponents.subFrames = 0
-            
+
         return Timecode(
             .components(scaledComponents),
             at: localFrameRate,
@@ -43,63 +43,63 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
             by: .wrapping
         )
     }
-        
+
     /// Last internal MTC SPMTE timecode components formed from outgoing MTC data.
     @PThreadMutex
     public internal(set) var mtcComponents = Timecode.Components()
-    
+
     func setMTCComponents(mtc newComponents: Timecode.Components) {
         mtcComponents = newComponents
     }
-        
+
     /// Local frame rate (desired rate, not internal MTC SMPTE frame rate).
     @PThreadMutex
     public internal(set) var localFrameRate: TimecodeFrameRate = .fps30
-        
+
     /// Set local frame rate (desired rate, not internal MTC SMPTE frame rate).
     func setLocalFrameRate(_ newFrameRate: TimecodeFrameRate) {
         localFrameRate = newFrameRate
         mtcFrameRate = newFrameRate.mtcFrameRate
     }
-        
+
     /// The base MTC frame rate last transmitted.
     @PThreadMutex
     public internal(set) var mtcFrameRate: MTCFrameRate = .mtc30
-        
+
     public nonisolated(unsafe) var midiOutHandler: MIDIOutHandler?
-    
+
     public func setMIDIOutHandler(_ handler: MIDIOutHandler?) {
         midiOutHandler = handler
     }
-    
+
     // MARK: - Internal properties
-        
+
     /// Last internal MTC quarter-frame formed. (`0 ... 7`)
     nonisolated(unsafe) var mtcQuarterFrame: UInt8 = 0
-        
+
     /// Internal:
     /// Flag indicating whether the quarter-frame output stream has already started since the last
     /// ``locate(to:transmitFullFrame:)`` (or since initializing the class if
     /// ``locate(to:transmitFullFrame:)`` has not yet been called).
     nonisolated(unsafe) var mtcQuarterFrameStreamHasStartedSinceLastLocate = false
-        
+
     /// Internal: track last full-frame message sent to the handler.
     nonisolated(unsafe) var lastTransmitFullFrame: (
         mtcComponents: Timecode.Components,
         mtcFrameRate: MTCFrameRate
     )?
-        
+
     // MARK: - init
-        
+
     /// Initialize and optionally set the handler used when a MTC MIDI message needs transmitting.
     init(
         midiOutHandler: MIDIOutHandler? = nil
     ) {
         self.midiOutHandler = midiOutHandler
     }
-        
+
     // MARK: - methods
-        
+
     /// Locates to a new timecode.
     /// Subframes will be stripped if `!= 0` since MTC full-frame message resolution is 1 frame.
     ///
@@ -116,7 +116,7 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
             transmitFullFrame: transmitFullFrame
         )
     }
-        
+
     /// Locates to a new timecode.
     /// Subframes will be stripped if `!= 0` since MTC full-frame message resolution is 1 frame.
     ///
@@ -132,24 +132,24 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
         if let frameRate {
             setLocalFrameRate(frameRate)
         }
-            
+
         // Step 1: set Encoder's internal MTC components
-            
+
         let scaledFrames = localFrameRate
             .scaledFrames(fromTimecodeFrames: Double(components.frames))
-            
+
         var newComponents = components
         newComponents.frames = scaledFrames.rawMTCFrames
-            
+
         // sanitize: clear subframes since we're working at 1-frame resolution with timecode display values
         newComponents.subFrames = 0
-            
+
         setMTCComponents(mtc: newComponents)
         mtcQuarterFrame = scaledFrames.rawMTCQuarterFrames
         mtcQuarterFrameStreamHasStartedSinceLastLocate = false
-            
+
         // Step 2: tell handler to transmit full-frame message if applicable
-            
+
         switch transmitFullFrame {
         case .always:
             sendFullFrameMIDIMessage()
@@ -158,7 +158,7 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
                 mtcComponents: newComponents,
                 mtcQuarterFrames: scaledFrames.rawMTCQuarterFrames
             )
-                
+
             let newFullFrame = (
                 mtcComponents: newComponents,
                 mtcFrameRate: mtcFrameRate
@@ -170,7 +170,7 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
             break
         }
     }
-        
+
     /// Advances to the next quarter-frame and triggers a quarter-frame MIDI message sent to the
     /// MIDI handler.
     ///
@@ -188,18 +188,18 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
                     .components(mtcComponents),
                     at: mtcFrameRate.directEquivalentFrameRate
                 ) else { return }
-                    
+
                 try? tc.add(.components(f: 2), by: .wrapping)
                 mtcComponents = tc.components
                 mtcQuarterFrame = 0
             }
         }
-            
+
         // tell handler to transmit MIDI message
         sendQuarterFrameMIDIMessage()
         mtcQuarterFrameStreamHasStartedSinceLastLocate = true
     }
-        
+
     /// Decrements to the previous quarter-frame and triggers a quarter-frame MIDI message sent to
     /// the MIDI handler.
     ///
@@ -217,28 +217,28 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
                     .components(mtcComponents),
                     at: mtcFrameRate.directEquivalentFrameRate
                 ) else { return }
-                    
+
                 try? tc.subtract(.components(f: 2), by: .wrapping)
                 mtcComponents = tc.components
                 mtcQuarterFrame = 7
             }
         }
-            
+
         // tell handler to transmit MIDI message
         sendQuarterFrameMIDIMessage()
         mtcQuarterFrameStreamHasStartedSinceLastLocate = true
     }
-        
+
     /// Manually trigger a MIDI handler event to transmit a full-frame message at the current
     /// timecode.
     public func sendFullFrameMIDIMessage() {
         let ffMessage = generateFullFrameMIDIMessage()
-            
+
         midiOut(ffMessage.event)
-            
+
         lastTransmitFullFrame = (ffMessage.components, mtcFrameRate)
     }
-        
+
     /// Internal: generates a full-frame message at current position.
     func generateFullFrameMIDIMessage() -> (
         event: MIDIEvent,
@@ -248,19 +248,19 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
         // (1-frame resolution, does not carry subframe information)
         // ---------------------
         // F0 7F 7F 01 01 hh mm ss ff F7
-            
+
         // hour byte includes base framerate info
         // 0rrhhhhh: Rate (0–3) and hour (0–23).
         // rr == 00: 24 frames/s
         // rr == 01: 25 frames/s
         // rr == 10: 29.97d frames/s (SMPTE drop-frame timecode)
         // rr == 11: 30 frames/s
-            
+
         let newComponents = convertToFullFrameComponents(
             mtcComponents: mtcComponents,
             mtcQuarterFrames: mtcQuarterFrame
         )
-        
+
         do {
             let midiEvent: MIDIEvent = try .universalSysEx7(
                 universalType: .realTime,
@@ -274,7 +274,7 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
                     UInt8(newComponents.frames)
                 ]
             )
-            
+
             return (event: midiEvent, components: newComponents)
         } catch {
             assertionFailure(
@@ -284,15 +284,15 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
             return (event: midiEvent, components: newComponents)
         }
     }
-        
+
     /// Internal: triggers a handler event to transmit a quarter-frame message.
     func sendQuarterFrameMIDIMessage() {
         midiOut(generateQuarterFrameMIDIMessage())
-            
+
         // invalidate last full-frame information
         lastTransmitFullFrame = nil
     }
-        
+
     /// Internal: generates a quarter-frame message at current position.
     func generateQuarterFrameMIDIMessage() -> MIDIEvent {
         // Piece #  Data byte   Significance
@@ -305,9 +305,9 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
         // 5        0101 00mm   Minutes msbits
         // 6        0110 hhhh   Hours lsbits
         // 7        0111 0rrh   Rate and hours msbit
-            
+
         var dataByte: UInt8 = mtcQuarterFrame << 4
-            
+
         switch mtcQuarterFrame {
         case 0b000: // QF 0
             dataByte += (UInt8(mtcComponents.frames) & 0b00001111)
@@ -329,9 +329,9 @@ public final class MTCEncoder: SendsMIDIEvents, @unchecked Sendable { // @unchec
         default:
             break // will never happen
         }
-            
+
         let midiEvent: MIDIEvent = .timecodeQuarterFrame(dataByte: dataByte.toUInt7)
-            
+
         return midiEvent
     }
 }

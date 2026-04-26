@@ -1,6 +1,6 @@
 //
 //  MTCDirection.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -10,10 +10,10 @@ import SwiftMIDICore
 public enum MTCDirection {
     /// Normal playback with timecode incrementing.
     case forwards
-        
+
     /// Backwards playback with timecode decrementing.
     case backwards
-        
+
     /// Direction is unknown/ambiguous.
     case ambiguous
 }
@@ -25,7 +25,9 @@ extension MTCDirection: Hashable { }
 extension MTCDirection: Sendable { }
 
 extension MTCDirection: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension MTCDirection {
@@ -46,14 +48,14 @@ extension MTCDirection {
             self = .ambiguous
             return
         }
-        
+
         // check if identical first
         guard newQF != previousQF else {
             // can't be inferred
             self = .ambiguous
             return
         }
-        
+
         // next check min/max wrapping (0b111 -> 0b000 is forwards, 0b000 to 0b111 is backwards
         if newQF == 0b000, previousQF == 0b111 {
             self = .forwards

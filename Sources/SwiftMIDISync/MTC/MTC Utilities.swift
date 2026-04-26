@@ -1,6 +1,6 @@
 //
 //  MTC Utilities.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -16,19 +16,19 @@ func isMTCEqual(
     guard let strongLHS = lhs,
           let strongRHS = rhs
     else { return false }
-    
+
     let lhsComponents = strongLHS.mtcComponents
     let rhsComponents = strongRHS.mtcComponents
-    
+
     let componentsAreEqual =
         lhsComponents.hours == rhsComponents.hours &&
         lhsComponents.minutes == rhsComponents.minutes &&
         lhsComponents.seconds == rhsComponents.seconds &&
         lhsComponents.frames == rhsComponents.frames
-    
+
     let mtcFrameRatesAreEqual =
         strongLHS.mtcFrameRate == strongRHS.mtcFrameRate
-    
+
     return componentsAreEqual && mtcFrameRatesAreEqual
 }
 
@@ -40,6 +40,6 @@ func convertToFullFrameComponents(
 ) -> Timecode.Components {
     var newComponents = mtcComponents
     newComponents.frames += ((25 * Int(mtcQuarterFrames)) / 100)
-    
+
     return newComponents
 }

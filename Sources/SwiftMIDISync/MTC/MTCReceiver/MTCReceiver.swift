@@ -1,6 +1,6 @@
 //
 //  MTCReceiver.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -25,9 +25,9 @@ import SwiftTimecodeCore
 /// > timecodes when scrubbing or locating to different times.
 public final class MTCReceiver: @unchecked Sendable { // @unchecked required for @PThreadMutex use
     // MARK: - Public properties
-    
+
     public let name: String
-    
+
     @PThreadMutex
     public private(set) var state: State = .idle {
         didSet {
@@ -37,11 +37,11 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
             }
         }
     }
-    
+
     /// Property updated whenever incoming MTC timecode changes.
     @PThreadMutex
     public private(set) var timecode: Timecode
-    
+
     /// The frame rate the local system is using.
     /// Remember to also set this any time the local frame rate changes so the receiver can
     /// interpret the incoming MTC accordingly.
@@ -49,14 +49,14 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
         get { receiveQueue.sync { decoder.localFrameRate } }
         set { receiveQueue.sync { decoder.localFrameRate = newValue } }
     }
-    
+
     /// The frame rate the local system is using.
     /// Remember to also set this any time the local frame rate changes so the receiver can
     /// interpret the incoming MTC accordingly.
     public func setLocalFrameRate(_ newFrameRate: TimecodeFrameRate?) {
         localFrameRate = newFrameRate
     }
-    
+
     /// The SMPTE frame rate (24, 25, 29.97d, or 30) that was last received by the receiver.
     ///
     /// This property should only be inspected purely for developer informational or diagnostic
@@ -66,17 +66,17 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
     public var mtcFrameRate: MTCFrameRate {
         receiveQueue.sync { decoder.mtcFrameRate }
     }
-    
+
     /// Status of the direction of MTC quarter-frames received.
     public var direction: MTCDirection {
         receiveQueue.sync { decoder.direction }
     }
-    
+
     /// Behavior governing how locking occurs prior to chase.
     public let syncPolicy: SyncPolicy
-    
+
     // MARK: - Stored closures
-    
+
     /// Called when a meaningful change to the timecode has occurred which would require its display
     /// to be updated.
     ///
@@ -100,7 +100,7 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
         _ direction: MTCDirection,
         _ isFrameChanged: Bool
     ) -> Void)?
-    
+
     /// Called when a meaningful change to the timecode has occurred which would require its display
     /// to be updated.
     ///
@@ -131,7 +131,7 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
             self.timecodeChangedHandler = handler
         }
     }
-    
+
     /// Called when the MTC receiver's state changes.
     ///
     /// > Important:
@@ -139,7 +139,7 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
     /// > This closure may be executed on a background thread. If the logic in the closure results in
     /// > user interface updates, ensure that they are performed on the main actor/thread.
     nonisolated(unsafe) var stateChangedHandler: (@Sendable (_ state: State) -> Void)?
-    
+
     /// Called when the MTC receiver's state changes.
     ///
     /// > Important:
@@ -153,9 +153,9 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
             self.stateChangedHandler = handler
         }
     }
-    
+
     // MARK: - Init
-    
+
     /// Initialize a new MTC Receiver instance.
     ///
     /// > Important:
@@ -185,23 +185,23 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
         stateChanged: (@Sendable (_ state: State) -> Void)? = nil
     ) {
         // handle init arguments
-        
+
         let name = name ?? UUID().uuidString
         self.name = name
         self.syncPolicy = syncPolicy
         timecode = Timecode(.zero, at: initialLocalFrameRate ?? .fps30)
-        
+
         // queues
-        
+
         let receiveQueueName = (Bundle.main.bundleIdentifier ?? "com.orchetect.midikit")
             + ".mtcReceiver." + name + ".receive"
         receiveQueue = DispatchQueue(label: receiveQueueName, qos: .userInitiated)
-        
+
         // store handler closures
-        
+
         timecodeChangedHandler = receiveQueue.sync { timecodeChanged }
         stateChangedHandler = receiveQueue.sync { stateChanged }
-        
+
         // set up decoder reset timer
         // we're accounting for the largest reasonable interval of time we are willing to wait until
         // we assume non-contiguous MTC stream has stopped or failed
@@ -210,27 +210,27 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
         // 1 frame @ 23.976 = 41.7... ms
         // 1 quarter-frame = 41.7/4 = 10.4... ms
         // Timer checking twice per QF = ~5.0ms intervals = 200Hz
-        
+
         timer = SafeDispatchTimer(
             rate: .hertz(200.0),
             queue: receiveQueue,
             eventHandler: { }
         )
-        
+
         // decoder setup
-        
+
         decoder = receiveQueue.sync {
             MTCDecoder(
                 initialLocalFrameRate: initialLocalFrameRate
             )
         }
-        
+
         // set up handlers after self is initialized so we can capture reference to self
-        
+
         timer.setEventHandler { [weak self] in
             self?.timerFired()
         }
-        
+
         decoder.setTimecodeChangedHandler { [weak self] timecode, messageType, direction, isFrameChanged in
             self?.timecodeDidChange(
                 to: timecode,
@@ -240,40 +240,40 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
             )
         }
     }
-    
+
     // MARK: - Queue (internal)
-    
+
     private let receiveQueue: DispatchQueue
-    
+
     // MARK: - Decoder (internal)
-    
+
     nonisolated(unsafe)
     var decoder: MTCDecoder!
-    
+
     @PThreadMutex
     public private(set) var timeLastQuarterFrameReceived: timespec = .init()
-    
+
     @PThreadMutex
     private var freewheelPreviousTimecode: Timecode = .init(.zero, at: .fps30)
-    
+
     @PThreadMutex
     private var freewheelSequentialFrames: Int = 0
-    
+
     // MARK: - Timer (internal)
-    
+
     private nonisolated(unsafe) let timer: SafeDispatchTimer
-    
+
     /// Internal: Fired from our timer object.
     func timerFired() {
         // this will be called by the timer which operates on our internal queue, so we don't need
         // to wrap this in queue.async { }
-        
+
         let timeNow = clock_gettime_monotonic_raw()
-        
+
         let clockDiff = timeNow - timeLastQuarterFrameReceived
-        
+
         // increment state from preSync to chasing once requisite frames have elapsed
-        
+
         switch state {
         case let .preSync(_, prTimecode):
             if timecode >= prTimecode {
@@ -281,13 +281,13 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
             }
         default: break
         }
-        
+
         // timer timeout condition
         let continuousQFTimeout = timespec(
             tv_sec: 0,
             tv_nsec: 50_000_000
         )
-        
+
         let dropOutFramesDuration =
             Timecode(
                 .components(f: syncPolicy.dropOutFrames),
@@ -295,9 +295,9 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
                 by: .wrapping
             )
             .realTimeValue
-        
+
         let freewheelTimeout = timespec(dropOutFramesDuration)
-        
+
         // if >20ms window of time since last quarter frame, assume MTC message stream has been
         // stopped/interrupted or being received at a speed less than realtime (ie: when Pro Tools
         // plays back at half-speed) and reset our internal tracker
@@ -305,9 +305,9 @@ public final class MTCReceiver: @unchecked Sendable { // @unchecked required for
            clockDiff < freewheelTimeout
         {
             decoder.resetQFBuffer()
-            
+
             state = .freewheeling
-                
+
         } else if clockDiff > freewheelTimeout {
             state = .idle
             timer.stop()
@@ -337,19 +337,19 @@ extension MTCReceiver {
     ) {
         // determine frame rate compatibility
         var frameRateIsCompatible = true
-        
+
         if let localFrameRate = decoder.localFrameRate,
            !incomingTC.frameRate.isCompatible(with: localFrameRate)
         {
             frameRateIsCompatible = false
         }
-        
+
         if event == .fullFrame,
            !frameRateIsCompatible
         {
             return
         }
-        
+
         if event == .quarterFrame {
             // assess if MTC frame rate and local frame rate are compatible with each other
             if !frameRateIsCompatible {
@@ -357,25 +357,25 @@ extension MTCReceiver {
             } else if state == .incompatibleFrameRate {
                 state = .freewheeling
             }
-            
+
             // log quarter-frame timestamp
             let timeNow = clock_gettime_monotonic_raw()
             timeLastQuarterFrameReceived = timeNow
-            
+
             // update state
             if state == .idle {
                 state = .freewheeling
             }
-            
+
             // start timer
             if !timer.running {
                 timer.restart()
             }
         }
-        
+
         // update class property
         timecode = incomingTC
-        
+
         // notify handler to update display
         timecodeChangedHandler?(
             incomingTC,
@@ -383,7 +383,7 @@ extension MTCReceiver {
             direction,
             isFrameChanged
         )
-        
+
         if event == .quarterFrame {
             // update state
             if state == .freewheeling {
@@ -398,46 +398,46 @@ extension MTCReceiver {
                     freewheelSequentialFrames = 0
                 }
             }
-            
+
             if state == .freewheeling,
                freewheelSequentialFrames <= syncPolicy.lockFrames
             {
                 // enter preSync phase
-                
+
                 freewheelSequentialFrames = 0
-                
+
                 // calculate time until lock
-                
+
                 let preSyncFrames = Timecode(
                     .components(f: syncPolicy.lockFrames),
                     at: decoder.localFrameRate ?? incomingTC.frameRate,
                     by: .wrapping
                 )
                 let prerollDuration = Int(preSyncFrames.realTimeValue * 1_000_000) // microseconds
-                
+
                 let now = DispatchTime.now() // same as DispatchTime(rawValue: mach_absolute_time())
                 let durationUntilLock = DispatchTimeInterval.microseconds(prerollDuration)
                 let futureTime = now + durationUntilLock
-                
+
                 let lockTimecode = incomingTC.advanced(by: syncPolicy.lockFrames)
-                
+
                 // change receiver state
-                
+
                 state = .preSync(
                     predictedLockTime: futureTime,
                     lockTimecode: lockTimecode
                 )
-                
+
             } else if freewheelSequentialFrames >= syncPolicy.lockFrames {
                 // enter chasing phase
-                
+
                 switch state {
                 case .preSync:
                     state = .sync
                 default: break
                 }
             }
-            
+
             // update registers
             freewheelPreviousTimecode = incomingTC
         }
