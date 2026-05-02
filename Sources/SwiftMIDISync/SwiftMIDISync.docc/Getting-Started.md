@@ -14,4 +14,4 @@ import SwiftMIDISync
 
 ## 2. Example Code
 
-See the **MTCExample** example project for a demonstration of ``MTCGenerator`` and ``MTCReceiver``. 
+See the **MTC Example** example project in the Examples folder for a demonstration of ``MTCGenerator`` and ``MTCReceiver``. 
