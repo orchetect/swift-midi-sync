@@ -1,6 +1,6 @@
 //
 //  SwiftMIDISync Extensions.swift
-//  SwiftMIDI Examples • https://github.com/orchetect/swift-midi-examples
+//  SwiftMIDI Sync • https://github.com/orchetect/swift-midi-sync
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
